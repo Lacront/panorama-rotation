@@ -1,0 +1,8 @@
+{
+  "ui": false,
+  "server": {
+    "baseDir": "./panoramas",
+    "index": "index.html"
+  },
+  "watch": true
+}
