@@ -72,8 +72,8 @@ const calculateRotationForInput = (input, originQuaternion, additionalRotation) 
   const quaternion = new Quaternion(input.w, input.x, input.y, input.z);
   const axis = quaternion.toEuler('XYZ');
 
-  const degrees = radToDeg(axis[2]);
-  const resultAngle = normalizeDegrees(-degrees);
+  const degrees = radToDeg(axis[2]) + additionalRotation;
+  const resultAngle = normalizeDegrees(degrees);
 
   const expected = normalizeDegrees(Number.parseFloat(input.expected));
   const deltaExpectedResult = Math.abs(resultAngle - expected);
@@ -85,6 +85,7 @@ const calculateRotationForInput = (input, originQuaternion, additionalRotation) 
   if (!isValid) {
     console.log(`Expected: `, expected, buildUrl(input.image, expected));
     console.log('Result:', resultAngle);
+    console.log('Angle:', degrees);
   }
 };
 
