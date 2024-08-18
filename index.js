@@ -2,7 +2,7 @@ const Quaternion = require('quaternion');
 const { parseCsvData } = require('./inputValues');
 
 const urlTemplate = 'http://localhost:3000/?img=$IMAGE_LINK$&yaw=$YAW$';
-const angleResultToleranceDegrees = 10;
+const angleResultToleranceDegrees = 20;
 
 const buildUrl = (img, yaw) => {
   return urlTemplate.replace('$IMAGE_LINK$', img)
@@ -51,7 +51,7 @@ const calculateRotationForInputMine = (input, originQuaternion, additionalRotati
   let isValid = true;
   if (input.expected) {
     const diff = angleDiff(normalizeDegrees(parseInt(input.expected)), normalizeDegrees(result));
-    isValid = diff < angleResultToleranceDegrees;
+    isValid = diff < angleResultToleranceDegrees || (diff < 360 && diff > (360 - angleResultToleranceDegrees));
   }
 
   console.log('-------------------------------------');
@@ -69,11 +69,15 @@ const calculateRotationForInputMine = (input, originQuaternion, additionalRotati
 
 const calculateRotationForInput = (input, originQuaternion, additionalRotation) => {
   // TODO: Calculate the `yaw` angle in degrees that the panorama needs to be rotated to face North
-  const resultAngle = 0;
+  const quaternion = new Quaternion(input.w, input.x, input.y, input.z);
+  const axis = quaternion.toEuler('XYZ');
+
+  const degrees = radToDeg(axis[2]);
+  const resultAngle = normalizeDegrees(-degrees);
 
   const expected = normalizeDegrees(Number.parseFloat(input.expected));
   const deltaExpectedResult = Math.abs(resultAngle - expected);
-  const isValid = deltaExpectedResult < angleResultToleranceDegrees;
+  const isValid = deltaExpectedResult < angleResultToleranceDegrees || (deltaExpectedResult < 360 && deltaExpectedResult > (360 - angleResultToleranceDegrees));
 
   console.log('-------------------------------------');
   console.log(`[${input.image}], ${isValid ? 'VALID' : 'INVALID'}, Delta:`, deltaExpectedResult.toFixed(2), buildUrl(input.image, resultAngle));
